@@ -4,44 +4,128 @@ const User = require("../models/User");
 const router = express.Router();
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
-const authMiddleware = require("../middleware/authMiddleware");
+const authMiddleware = require("../middlewares/authMiddleware");
+const HttpError = require("../helpers/HttpError");
+const validateBody = require("../middlewares/validateBody");
+const {
+  userLoginSchema,
+  userRegistrationSchema,
+} = require("../schemas/validationSchemas");
 
-// Роут для логина
-router.post("/user/login", async (req, res) => {
-  const { email, password } = req.body;
-  console.log("Запрос на логин:", { email, password });
+// Route for login
+router.post(
+  "/user/login",
+  validateBody(userLoginSchema),
+  async (req, res, next) => {
+    const { email, password } = req.body;
+
+    try {
+      const user = await User.findOne({ email });
+      if (!user) {
+        return next(HttpError(401, "Invalid email or password"));
+      }
+
+      const isMatch = await bcrypt.compare(password, user.password);
+      if (!isMatch) {
+        return next(HttpError(401, "Invalid email or password"));
+      }
+
+      const accessToken = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+        expiresIn: "15m",
+      });
+
+      const refreshToken = jwt.sign(
+        { id: user._id },
+        process.env.JWT_REFRESH_SECRET,
+        { expiresIn: "7d" }
+      );
+
+      // Optionally, save the refresh token in the database
+      user.refreshToken = refreshToken;
+      await user.save();
+
+      res.status(200).json({ accessToken, refreshToken });
+    } catch (error) {
+      next(HttpError(500, "Server error"));
+    }
+  }
+);
+
+// Route for register
+router.post(
+  "/user/register",
+  validateBody(userRegistrationSchema),
+  async (req, res, next) => {
+    const { name, email, password } = req.body;
+
+    try {
+      const existingUser = await User.findOne({ email });
+      if (existingUser) {
+        return next(HttpError(409, "Email already in use"));
+      }
+
+      const hashedPassword = await bcrypt.hash(password, 10);
+      const newUser = new User({ name, email, password: hashedPassword });
+      await newUser.save();
+
+      const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET, {
+        expiresIn: "1h",
+      });
+
+      res.status(201).json({ token });
+    } catch (error) {
+      console.error("Error in registration route:", error.message);
+      next(HttpError(500, "Server error"));
+    }
+  }
+);
+
+// Route for refresh-token
+router.post("/user/refresh-token", async (req, res, next) => {
+  const { refreshToken } = req.body;
+
+  if (!refreshToken) {
+    return next(HttpError(401, "Refresh token is required"));
+  }
 
   try {
-    // Поиск пользователя по email
-    const user = await User.findOne({ email });
-    if (!user) {
-      console.log("Пользователь не найден:", email);
-      return res.status(400).json({ message: "Неправильный email или пароль" });
+    const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
+
+    const user = await User.findById(decoded.id);
+    if (!user || user.refreshToken !== refreshToken) {
+      return next(HttpError(401, "Invalid refresh token"));
     }
 
-    // Проверка пароля
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
-      console.log("Пароль не совпадает для пользователя:", email);
-      return res.status(400).json({ message: "Неправильный email или пароль" });
-    }
-
-    // Генерация JWT токена
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-      expiresIn: "1h",
+    const newAccessToken = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+      expiresIn: "15m",
     });
 
-    console.log("Токен создан для пользователя:", email);
-    res.status(200).json({ token });
-  } catch (error) {
-    console.error("Ошибка в маршруте логина:", error.message);
-    res.status(500).json({ message: "Ошибка сервера" });
+    res.json({ accessToken: newAccessToken });
+  } catch (err) {
+    next(HttpError(401, "Invalid refresh token"));
   }
 });
 
-// Пример защищенного маршрута
+// Logout route
+router.post("/user/logout", authMiddleware, async (req, res, next) => {
+  try {
+    const userId = req.user.id;
+    const user = await User.findById(userId);
+
+    if (user) {
+      user.refreshToken = null; // Invalidate the refresh token
+      await user.save();
+    }
+
+    res.status(204).send(); // Successful logout
+  } catch (error) {
+    next(HttpError(500, "Server error"));
+  }
+});
+
+// Example protected route
 router.get("/api/user/protected", authMiddleware, (req, res) => {
-  res.json({ message: "Доступ разрешен", user: req.user });
+  res.json({ message: "Access granted", user: req.user });
 });
 
 module.exports = router;

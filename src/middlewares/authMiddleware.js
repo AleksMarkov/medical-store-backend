@@ -1,13 +1,12 @@
 //authMiddleware.js
 const jwt = require("jsonwebtoken");
+const HttpError = require("../helpers/HttpError");
 
 const authMiddleware = (req, res, next) => {
   const token = req.header("Authorization");
 
   if (!token) {
-    return res
-      .status(401)
-      .json({ message: "Нет токена, авторизация отклонена" });
+    return next(HttpError(401, "Нет токена, авторизация отклонена"));
   }
 
   try {
@@ -15,7 +14,7 @@ const authMiddleware = (req, res, next) => {
     req.user = decoded;
     next();
   } catch (err) {
-    res.status(401).json({ message: "Токен недействителен" });
+    next(HttpError(401, "Токен недействителен"));
   }
 };
 
