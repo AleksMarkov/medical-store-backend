@@ -40,11 +40,20 @@ router.post(
         { expiresIn: "7d" }
       );
 
-      // Optionally, save the refresh token in the database
+      // Save the refresh token in the database
       user.refreshToken = refreshToken;
       await user.save();
 
-      res.status(200).json({ accessToken, refreshToken });
+      // Return user's details along with tokens
+      res.status(200).json({
+        accessToken,
+        refreshToken,
+        user: {
+          id: user._id,
+          name: user.name,
+          email: user.email,
+        },
+      });
     } catch (error) {
       next(HttpError(500, "Server error"));
     }
