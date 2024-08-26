@@ -4,10 +4,11 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 require("dotenv").config();
 const userRoutes = require("./routes/userRoutes.js");
+const dashboardRoutes = require("./routes/dashboardRoutes"); // Import the new dashboard routes
 const HttpError = require("./helpers/HttpError");
 const cookieParser = require("cookie-parser");
 
-const app = express();
+const app = express(); // Initialize app
 
 // Middleware
 app.use(cors());
@@ -16,6 +17,7 @@ app.use(cookieParser());
 
 // Attach routes
 app.use("/api", userRoutes);
+app.use("/api", dashboardRoutes); // Use dashboard routes after app is defined
 
 // Handle 404
 app.use((req, res, next) => {
