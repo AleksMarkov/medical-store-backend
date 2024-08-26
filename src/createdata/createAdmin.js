@@ -1,7 +1,7 @@
 //createAdmin.js
 const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
-const User = require("./models/User"); // Проверь путь до модели пользователя
+const User = require("../models/User");
 require("dotenv").config();
 
 const createUser = async () => {
