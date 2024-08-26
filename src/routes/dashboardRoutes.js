@@ -24,8 +24,8 @@ router.get("/dashboard", async (req, res, next) => {
 
     // Get recent customers sorted by register_date
     const recentCustomers = await Customer.find({})
-      .sort({ register_date: -1 })
-      .select("name email spent register_date");
+      // .sort({ register_date: -1 })
+      .select("image name email spent register_date");
     //   .limit(5); // Adjust limit as needed
 
     // Get all income and expense entries
