@@ -5,11 +5,11 @@ const orderSchema = new mongoose.Schema({
   id: String,
   photo: String,
   name: String,
-  email: String,
-  spent: String,
-  phone: String,
   address: String,
-  register_date: String,
+  products: String,
+  price: String,
+  status: String,
+  order_date: String,
 });
 
 module.exports = mongoose.model("Order", orderSchema);
