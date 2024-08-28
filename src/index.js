@@ -1,4 +1,5 @@
 //index.js
+// index.js
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
@@ -6,6 +7,7 @@ require("dotenv").config();
 const userRoutes = require("./routes/userRoutes.js");
 const dashboardRoutes = require("./routes/dashboardRoutes");
 const ordersRoutes = require("./routes/ordersRoutes");
+const productsRoutes = require("./routes/productsRoutes");
 const HttpError = require("./helpers/HttpError");
 const cookieParser = require("cookie-parser");
 
@@ -18,7 +20,7 @@ app.use(cookieParser());
 app.use("/api", userRoutes);
 app.use("/api", dashboardRoutes);
 app.use("/api", ordersRoutes);
-
+app.use("/api", productsRoutes);
 app.use((req, res, next) => {
   next(HttpError(404, "Route not found"));
 });
