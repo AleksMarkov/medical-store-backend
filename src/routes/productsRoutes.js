@@ -13,4 +13,46 @@ router.get("/products", async (req, res, next) => {
   }
 });
 
+// Add new product
+router.post("/products", async (req, res, next) => {
+  const { name, suppliers, stock, price, category, photo } = req.body;
+  const newProduct = new Product({
+    name,
+    suppliers,
+    stock,
+    price,
+    category,
+    photo,
+  });
+
+  try {
+    const savedProduct = await newProduct.save();
+    res.status(201).json(savedProduct);
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Update product
+router.put("/products/:productId", async (req, res, next) => {
+  const { productId } = req.params;
+  const { name, suppliers, stock, price, category } = req.body;
+
+  try {
+    const updatedProduct = await Product.findByIdAndUpdate(
+      productId,
+      { name, suppliers, stock, price, category },
+      { new: true }
+    );
+
+    if (!updatedProduct) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+    res.status(200).json(updatedProduct);
+  } catch (error) {
+    next(error);
+  }
+});
+
 module.exports = router;

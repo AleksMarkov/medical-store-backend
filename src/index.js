@@ -1,5 +1,4 @@
 //index.js
-// index.js
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
@@ -21,6 +20,7 @@ app.use("/api", userRoutes);
 app.use("/api", dashboardRoutes);
 app.use("/api", ordersRoutes);
 app.use("/api", productsRoutes);
+
 app.use((req, res, next) => {
   next(HttpError(404, "Route not found"));
 });
