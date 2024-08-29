@@ -7,6 +7,7 @@ const userRoutes = require("./routes/userRoutes.js");
 const dashboardRoutes = require("./routes/dashboardRoutes");
 const ordersRoutes = require("./routes/ordersRoutes");
 const productsRoutes = require("./routes/productsRoutes");
+const suppliersRoutes = require("./routes/suppliersRoutes");
 const HttpError = require("./helpers/HttpError");
 const cookieParser = require("cookie-parser");
 
@@ -20,6 +21,7 @@ app.use("/api", userRoutes);
 app.use("/api", dashboardRoutes);
 app.use("/api", ordersRoutes);
 app.use("/api", productsRoutes);
+app.use("/api", suppliersRoutes);
 
 app.use((req, res, next) => {
   next(HttpError(404, "Route not found"));
