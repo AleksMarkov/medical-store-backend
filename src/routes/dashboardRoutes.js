@@ -9,26 +9,19 @@ const router = express.Router();
 // Get dashboard data
 router.get("/dashboard", async (req, res, next) => {
   try {
-    // Get total stock of all products
     const products = await Product.find({});
     const allProducts = products.reduce(
       (sum, product) => sum + Number(product.stock),
       0
     );
-
-    // Get total number of suppliers
     const allSuppliers = await Supplier.countDocuments();
 
-    // Get total number of customers
     const allCustomers = await Customer.countDocuments();
 
-    // Get recent customers sorted by register_date
-    const recentCustomers = await Customer.find({})
-      // .sort({ register_date: -1 })
-      .select("image name email spent register_date");
-    //   .limit(5); // Adjust limit as needed
+    const recentCustomers = await Customer.find({}).select(
+      "image name email spent register_date"
+    );
 
-    // Get all income and expense entries
     const incomeExpenseList = await Income.find({}).select("name amount type");
 
     res.status(200).json({

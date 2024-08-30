@@ -40,11 +40,9 @@ router.post(
         { expiresIn: "7d" }
       );
 
-      // Save the refresh token in the database
       user.refreshToken = refreshToken;
       await user.save();
 
-      // Return user's details along with tokens
       res.status(200).json({
         accessToken,
         refreshToken,
@@ -122,19 +120,14 @@ router.post("/user/logout", authMiddleware, async (req, res, next) => {
     const user = await User.findById(userId);
 
     if (user) {
-      user.refreshToken = null; // Invalidate the refresh token
+      user.refreshToken = null;
       await user.save();
     }
 
-    res.status(204).send(); // Successful logout
+    res.status(204).send();
   } catch (error) {
     next(HttpError(500, "Server error"));
   }
-});
-
-// Example protected route
-router.get("/api/user/protected", authMiddleware, (req, res) => {
-  res.json({ message: "Access granted", user: req.user });
 });
 
 module.exports = router;

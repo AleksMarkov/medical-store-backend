@@ -3,18 +3,19 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 require("dotenv").config();
-const userRoutes = require("./routes/userRoutes.js");
-const dashboardRoutes = require("./routes/dashboardRoutes");
-const ordersRoutes = require("./routes/ordersRoutes");
-const productsRoutes = require("./routes/productsRoutes");
-const suppliersRoutes = require("./routes/suppliersRoutes");
-const customersRoutes = require("./routes/customersRoutes");
-const HttpError = require("./helpers/HttpError");
+const userRoutes = require("./src/routes/userRoutes.js");
+const dashboardRoutes = require("./src/routes/dashboardRoutes.js");
+const ordersRoutes = require("./src/routes/ordersRoutes.js");
+const productsRoutes = require("./src/routes/productsRoutes.js");
+const suppliersRoutes = require("./src/routes/suppliersRoutes.js");
+const customersRoutes = require("./src/routes/customersRoutes.js");
+const HttpError = require("./src/helpers/HttpError.js");
 const cookieParser = require("cookie-parser");
 
 const app = express();
 
-app.use(cors());
+// app.use(cors());
+app.use(cors({ origin: "https://AleksMarkov.github.io" }));
 app.use(express.json());
 app.use(cookieParser());
 
