@@ -114,7 +114,7 @@ router.post("/user/refresh-token", async (req, res, next) => {
 });
 
 // Logout route
-router.post("/user/logout", authMiddleware, async (req, res, next) => {
+router.get("/user/logout", authMiddleware, async (req, res, next) => {
   try {
     const userId = req.user.id;
     const user = await User.findById(userId);
