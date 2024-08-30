@@ -15,7 +15,8 @@ const cookieParser = require("cookie-parser");
 const app = express();
 
 // app.use(cors());
-app.use(cors({ origin: "https://AleksMarkov.github.io" }));
+// app.use(cors({ origin: "https://AleksMarkov.github.io" }));
+app.use(cors({ origin: "https://aleksmarkov.github.io" }));
 app.use(express.json());
 app.use(cookieParser());
 
