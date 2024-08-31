@@ -107,7 +107,16 @@ router.post("/user/refresh-token", async (req, res, next) => {
       expiresIn: "15m",
     });
 
-    res.json({ accessToken: newAccessToken });
+    const newRefreshToken = jwt.sign(
+      { id: user._id },
+      process.env.JWT_REFRESH_SECRET,
+      { expiresIn: "7d" }
+    );
+
+    user.refreshToken = newRefreshToken;
+    await user.save();
+
+    res.json({ accessToken: newAccessToken, refreshToken: newRefreshToken });
   } catch (err) {
     next(HttpError(401, "Invalid refresh token"));
   }
@@ -124,6 +133,7 @@ router.get("/user/logout", authMiddleware, async (req, res, next) => {
       await user.save();
     }
 
+    res.clearCookie("refreshToken");
     res.status(204).send();
   } catch (error) {
     next(HttpError(500, "Server error"));

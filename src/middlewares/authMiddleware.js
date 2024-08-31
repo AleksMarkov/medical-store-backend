@@ -3,10 +3,16 @@ const jwt = require("jsonwebtoken");
 const HttpError = require("../helpers/HttpError");
 
 const authMiddleware = (req, res, next) => {
-  const token = req.header("Authorization");
+  const authHeader = req.header("Authorization");
+
+  if (!authHeader) {
+    return next(HttpError(401, "Нет токена, авторизация отклонена"));
+  }
+
+  const token = authHeader.split(" ")[1]; // Извлекаем токен из заголовка "Bearer <token>"
 
   if (!token) {
-    return next(HttpError(401, "Нет токена, авторизация отклонена"));
+    return next(HttpError(401, "Неверный формат токена"));
   }
 
   try {
@@ -14,6 +20,9 @@ const authMiddleware = (req, res, next) => {
     req.user = decoded;
     next();
   } catch (err) {
+    if (err.name === "TokenExpiredError") {
+      return next(HttpError(401, "Токен истек"));
+    }
     next(HttpError(401, "Токен недействителен"));
   }
 };
