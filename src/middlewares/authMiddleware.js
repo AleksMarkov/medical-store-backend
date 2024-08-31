@@ -9,8 +9,7 @@ const authMiddleware = (req, res, next) => {
     return next(HttpError(401, "Нет токена, авторизация отклонена"));
   }
 
-  const token = authHeader.split(" ")[1]; // Извлекаем токен из заголовка "Bearer <token>"
-
+  const token = authHeader.split(" ")[1];
   if (!token) {
     return next(HttpError(401, "Неверный формат токена"));
   }
