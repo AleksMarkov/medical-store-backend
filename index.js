@@ -17,7 +17,7 @@ const app = express();
 const corsOptions = {
   origin:
     process.env.NODE_ENV === "production"
-      ? "https://aleksmarkov.github.io"
+      ? "https://aleksmarkov.github.io/medical-store-frontend/"
       : "http://localhost:3000",
   credentials: true,
   optionsSuccessStatus: 200,
